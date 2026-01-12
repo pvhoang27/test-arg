@@ -25,12 +25,29 @@
             </svg>
             <span class="gradient-text">EnglishMaster</span>
         </a>
-        <nav>
+        <nav style="display: flex; gap: 1rem;">
+            <button class="btn btn-secondary" onclick="app.showHistory()">History</button>
             <button class="btn btn-secondary">Login</button>
         </nav>
     </header>
 
     <main class="container">
+        <!-- History View -->
+        <section id="history" class="view">
+            <div class="container" style="max-width: 800px;">
+                <h2 style="margin-bottom: 2rem; text-align: center;">Exam History</h2>
+                <div id="history-list" class="animate-fade-in">
+                    <!-- History items injected by JS -->
+                </div>
+                <div style="text-align: center; margin-top: 2rem;">
+                    <button class="btn btn-primary" onclick="app.navigate('home')">Back to Home</button>
+                    <button class="btn btn-secondary" onclick="app.clearHistory()"
+                        style="margin-left: 1rem; border-color: var(--error); color: var(--error);">Clear
+                        History</button>
+                </div>
+            </div>
+        </section>
+
         <!-- Home View -->
         <section id="home" class="view active animate-fade-in">
             <div class="hero">

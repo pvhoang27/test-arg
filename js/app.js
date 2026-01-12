@@ -89,7 +89,8 @@ class App {
             home: document.getElementById('home'),
             quiz: document.getElementById('quiz'),
             result: document.getElementById('result'),
-            review: document.getElementById('review')
+            review: document.getElementById('review'),
+            history: document.getElementById('history')
         };
 
         this.init();
@@ -111,6 +112,61 @@ class App {
 
         // Reset scroll
         window.scrollTo(0, 0);
+    }
+
+    saveResult(examId, score, total) {
+        const history = JSON.parse(localStorage.getItem('examHistory') || '[]');
+        const examTitle = exams.find(e => e.id === examId)?.title || 'Unknown Exam';
+
+        history.unshift({
+            examTitle,
+            score,
+            total,
+            date: new Date().toLocaleDateString('en-US', {
+                year: 'numeric', month: 'short', day: 'numeric',
+                hour: '2-digit', minute: '2-digit'
+            })
+        });
+
+        // Keep last 10 records
+        if (history.length > 10) history.pop();
+
+        localStorage.setItem('examHistory', JSON.stringify(history));
+    }
+
+    showHistory() {
+        const history = JSON.parse(localStorage.getItem('examHistory') || '[]');
+        const container = document.getElementById('history-list');
+
+        if (history.length === 0) {
+            container.innerHTML = `<p style="text-align: center; color: var(--text-muted);">No history yet. Take a quiz!</p>`;
+        } else {
+            container.innerHTML = history.map(item => {
+                const percentage = Math.round((item.score / item.total) * 100);
+                const color = percentage >= 80 ? 'var(--success)' : percentage >= 50 ? 'var(--primary)' : 'var(--error)';
+
+                return `
+                <div class="exam-card" style="display: flex; justify-content: space-between; align-items: center; padding: 1.5rem; margin-bottom: 1rem;">
+                    <div>
+                        <h3 style="font-size: 1.1rem; margin-bottom: 0.25rem;">${item.examTitle}</h3>
+                        <p style="color: var(--text-muted); font-size: 0.875rem;">${item.date}</p>
+                    </div>
+                    <div style="text-align: right;">
+                        <span style="display: block; font-size: 1.5rem; font-weight: bold; color: ${color};">${percentage}%</span>
+                        <span style="font-size: 0.875rem; color: var(--text-muted);">${item.score}/${item.total}</span>
+                    </div>
+                </div>
+            `}).join('');
+        }
+
+        this.navigate('history');
+    }
+
+    clearHistory() {
+        if (confirm('Are you sure you want to clear your history?')) {
+            localStorage.removeItem('examHistory');
+            this.showHistory();
+        }
     }
 
     renderExamList() {
@@ -227,6 +283,8 @@ class App {
         document.getElementById('score-message').textContent =
             percentage >= 80 ? 'Excellent work!' :
                 percentage >= 50 ? 'Good effort!' : 'Keep practicing!';
+
+        this.saveResult(this.currentExam.id, score, this.currentExam.data.length);
 
         this.navigate('result');
     }
